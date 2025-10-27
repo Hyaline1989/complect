@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подбор объекта для вахты</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://static.tildacdn.com/tild3432-6662-4137-b734-623236386135/favicon_.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://static.tildacdn.com/tild3432-6662-4137-b734-623236386135/favicon_.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://static.tildacdn.com/tild3432-6662-4137-b734-623236386135/favicon_.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h1>🔒 Доступ к системе подбора вахт</h1>
+        <div class="password-input">
+            <input type="password" id="password" placeholder="Введите пароль" onkeypress="handleEnterKey(event)">
+            <br>
+            <button class="login-btn" onclick="checkPassword()">Войти</button>
+            <div class="error-message" id="errorMessage">Неверный пароль. Попробуйте снова.</div>
+        </div>
+    </div>
+
+    <div class="content" id="content">
+        <div class="header" id="header">
+            <div class="burger-menu" id="burgerMenu">
+                <div class="burger-icon" onclick="toggleMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="menu-content" id="menuContent">
+                    <div class="menu-header">
+                        <h3>📋 Управление объектами</h3>
+                        <button class="close-menu" onclick="toggleMenu()">×</button>
+                    </div>
+                    <div class="menu-controls">
+                        <button onclick="checkAllObjects()">Выбрать все</button>
+                        <button onclick="uncheckAllObjects()">Снять все</button>
+                    </div>
+                    <div class="menu-items" id="menuItems">
+                        <!-- Список объектов будет здесь -->
+                    </div>
+                </div>
+            </div>
+            <div class="user-info" id="userInfo">
+                <!-- Кнопка выхода будет здесь -->
+            </div>
+        </div>
+
+        <h1>🎯 Подбор объекта для вахты</h1>
+        
+        <div class="sync-controls">
+            <button onclick="manualSync()" class="sync-btn"><i class="fas fa-sync-alt"></i> Обновить данные</button>
+            <div class="sync-status" id="syncStatus"></div>
+            <button class="debug-toggle" onclick="toggleDebug()">Отладка</button>
+        </div>
+
+        <!-- БЛОК УПРАВЛЕНИЯ ДЛЯ АДМИНИСТРАТОРА -->
+        <div class="admin-controls" id="adminControls" style="display: none;">
+            <h3>🛠️ Управление порядком объектов</h3>
+            <p>Перетаскивайте карточки для изменения порядка (держите за правый верхний угол)</p>
+            <div class="admin-buttons">
+                <button class="admin-btn save" onclick="saveGlobalOrder()" id="saveOrderBtn">💾 Сохранить порядок</button>
+                <button class="admin-btn reset" onclick="resetGlobalOrder()">🔄 Сбросить порядок</button>
+            </div>
+        </div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;">
+            <!-- Отладочная информация будет здесь -->
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="age">Возраст кандидата:</label>
+                <input type="number" id="age" min="18" max="65" value="25">
+            </div>
+
+            <div class="filter-group">
+                <label for="gender">Пол:</label>
+                <select id="gender">
+                    <option value="мужчина">Мужчина</option>
+                    <option value="женщина">Женщина</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="nationality">Гражданство:</label>
+                <select id="nationality">
+                    <option value="РФ">РФ</option>
+                    <option value="РБ">РБ</option>
+                    <option value="СНГ">СНГ</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="hasConviction">Наличие судимости:</label>
+                <select id="hasConviction">
+                    <option value="false">Нет судимости</option>
+                    <option value="true">Судим</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="results-count" id="resultsCount"></div>
+
+        <div id="results">
+            <!-- Сюда JavaScript вставит карточки объектов -->
+        </div>
+    </div>
+
+    <!-- Затемнение фона для меню -->
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+    <!-- Подключаем Supabase клиент -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Подключаем SortableJS для перетаскивания -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+    <!-- Подключаем наши JS модули -->
+    <script src="js/config.js"></script>
+    <script src="js/sheets.js"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/drag-drop.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
