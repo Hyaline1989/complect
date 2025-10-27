@@ -92,7 +92,7 @@ function startAutoUpdate() {
             await loadSettingsFromServer();
             filterAndDisplayObjects();
             updateSyncStatus('🔄 Данные автоматически обновлены');
-        }, 30000);
+        }, 60000);
     }
 }
 
