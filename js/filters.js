@@ -12,10 +12,19 @@ function filterAndDisplayObjects() {
     const selectedNationality = nationalitySelect.value;
     const selectedHasConviction = convictionSelect.value === 'true';
 
-    console.log('🔍 Фильтрация:', { selectedAge, selectedGender, selectedNationality, selectedHasConviction });
+    console.log('🔍 НАЧАЛО ФИЛЬТРАЦИИ:', { 
+        selectedAge, 
+        selectedGender, 
+        selectedNationality, 
+        selectedHasConviction,
+        totalObjects: objects.length
+    });
 
     const filteredObjects = objects.filter(obj => {
-        if (!obj.visible) return false;
+        if (!obj.visible) {
+            console.log(`🚫 ${obj.name} - скрыт в настройках`);
+            return false;
+        }
         
         // Базовые критерии фильтрации
         const ageMatch = selectedAge >= obj.ageMin && selectedAge <= obj.ageMax;
@@ -28,7 +37,16 @@ function filterAndDisplayObjects() {
         }
 
         // Проверяем базовые критерии
-        if (!ageMatch || !nationalityMatch || !convictionMatch) {
+        if (!ageMatch) {
+            console.log(`❌ ${obj.name} - не подходит по возрасту: ${selectedAge} не в диапазоне ${obj.ageMin}-${obj.ageMax}`);
+            return false;
+        }
+        if (!nationalityMatch) {
+            console.log(`❌ ${obj.name} - не подходит по гражданству: ${selectedNationality} не в ${obj.allowedNationalities}`);
+            return false;
+        }
+        if (!convictionMatch) {
+            console.log(`❌ ${obj.name} - не подходит по судимости`);
             return false;
         }
 
@@ -37,38 +55,54 @@ function filterAndDisplayObjects() {
         
         console.log(`📊 ${obj.name}:`, { 
             allowedGenders: obj.allowedGenders,
-            vacancyStats,
+            vacancyStats: {
+                men: vacancyStats.men,
+                women: vacancyStats.women,
+                family: vacancyStats.family
+            },
             selectedGender 
         });
 
         if (selectedGender === 'мужчина') {
             // Для мужчин: проверяем мужские вакансии И разрешен ли пол
-            if (!obj.allowedGenders.includes('мужчина') || vacancyStats.men === 0) {
-                console.log(`❌ ${obj.name} - не подходит для мужчин`);
+            if (!obj.allowedGenders.includes('мужчина')) {
+                console.log(`❌ ${obj.name} - пол "мужчина" не разрешен на объекте`);
+                return false;
+            }
+            if (vacancyStats.men === 0) {
+                console.log(`❌ ${obj.name} - нет вакансий для мужчин`);
                 return false;
             }
         }
         else if (selectedGender === 'женщина') {
             // Для женщин: проверяем женские вакансии И разрешен ли пол
-            if (!obj.allowedGenders.includes('женщина') || vacancyStats.women === 0) {
-                console.log(`❌ ${obj.name} - не подходит для женщин`);
+            if (!obj.allowedGenders.includes('женщина')) {
+                console.log(`❌ ${obj.name} - пол "женщина" не разрешен на объекте`);
+                return false;
+            }
+            if (vacancyStats.women === 0) {
+                console.log(`❌ ${obj.name} - нет вакансий для женщин`);
                 return false;
             }
         }
         else if (selectedGender === 'семейные') {
-            // Для семейных: проверяем семейные вакансии
+            // Для семейных: проверяем ТОЛЬКО наличие семейных вакансий
             // НЕ проверяем allowedGenders, так как семейные могут быть любого пола
             if (vacancyStats.family === 0) {
-                console.log(`❌ ${obj.name} - нет семейных комнат`);
+                console.log(`❌ ${obj.name} - нет семейных комнат (family = ${vacancyStats.family})`);
                 return false;
             }
+            console.log(`✅ ${obj.name} - ЕСТЬ семейные комнаты: ${vacancyStats.family}`);
         }
 
-        console.log(`✅ ${obj.name} - подходит`);
+        console.log(`✅ ${obj.name} - ПРОШЕЛ ВСЕ ФИЛЬТРЫ`);
         return true;
     });
 
-    console.log('🎯 Результаты фильтрации:', filteredObjects.map(obj => obj.name));
+    console.log('🎯 РЕЗУЛЬТАТЫ ФИЛЬТРАЦИИ:', filteredObjects.map(obj => ({
+        name: obj.name,
+        family: getVacancyStats(obj.name).family
+    })));
     displayResults(filteredObjects, resultsContainer, resultsCount);
 }
 
