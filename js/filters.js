@@ -12,6 +12,8 @@ function filterAndDisplayObjects() {
     const selectedNationality = nationalitySelect.value;
     const selectedHasConviction = convictionSelect.value === 'true';
 
+    console.log('🔍 Фильтрация:', { selectedAge, selectedGender, selectedNationality, selectedHasConviction });
+
     const filteredObjects = objects.filter(obj => {
         if (!obj.visible) return false;
         
@@ -33,30 +35,40 @@ function filterAndDisplayObjects() {
         // ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: есть ли актуальные вакансии для выбранного пола/семейных
         const vacancyStats = getVacancyStats(obj.name);
         
+        console.log(`📊 ${obj.name}:`, { 
+            allowedGenders: obj.allowedGenders,
+            vacancyStats,
+            selectedGender 
+        });
+
         if (selectedGender === 'мужчина') {
             // Для мужчин: проверяем мужские вакансии И разрешен ли пол
             if (!obj.allowedGenders.includes('мужчина') || vacancyStats.men === 0) {
+                console.log(`❌ ${obj.name} - не подходит для мужчин`);
                 return false;
             }
         }
-        
-        if (selectedGender === 'женщина') {
+        else if (selectedGender === 'женщина') {
             // Для женщин: проверяем женские вакансии И разрешен ли пол
             if (!obj.allowedGenders.includes('женщина') || vacancyStats.women === 0) {
+                console.log(`❌ ${obj.name} - не подходит для женщин`);
                 return false;
             }
         }
-        
-        if (selectedGender === 'семейные') {
+        else if (selectedGender === 'семейные') {
             // Для семейных: проверяем семейные вакансии
+            // НЕ проверяем allowedGenders, так как семейные могут быть любого пола
             if (vacancyStats.family === 0) {
+                console.log(`❌ ${obj.name} - нет семейных комнат`);
                 return false;
             }
         }
 
+        console.log(`✅ ${obj.name} - подходит`);
         return true;
     });
 
+    console.log('🎯 Результаты фильтрации:', filteredObjects.map(obj => obj.name));
     displayResults(filteredObjects, resultsContainer, resultsCount);
 }
 
