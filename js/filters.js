@@ -17,7 +17,6 @@ function filterAndDisplayObjects() {
         
         // Базовые критерии фильтрации
         const ageMatch = selectedAge >= obj.ageMin && selectedAge <= obj.ageMax;
-        const genderMatch = obj.allowedGenders.includes(selectedGender);
         const nationalityMatch = obj.allowedNationalities.includes(selectedNationality);
         let convictionMatch;
         if (selectedHasConviction) {
@@ -27,19 +26,32 @@ function filterAndDisplayObjects() {
         }
 
         // Проверяем базовые критерии
-        if (!ageMatch || !genderMatch || !nationalityMatch || !convictionMatch) {
+        if (!ageMatch || !nationalityMatch || !convictionMatch) {
             return false;
         }
 
-        // ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: есть ли актуальные вакансии для выбранного пола
+        // ДОПОЛНИТЕЛЬНАЯ ПРОВЕРКА: есть ли актуальные вакансии для выбранного пола/семейных
         const vacancyStats = getVacancyStats(obj.name);
         
-        if (selectedGender === 'мужчина' && vacancyStats.men === 0) {
-            return false; // Нет вакансий для мужчин
+        if (selectedGender === 'мужчина') {
+            // Для мужчин: проверяем мужские вакансии И разрешен ли пол
+            if (!obj.allowedGenders.includes('мужчина') || vacancyStats.men === 0) {
+                return false;
+            }
         }
         
-        if (selectedGender === 'женщина' && vacancyStats.women === 0) {
-            return false; // Нет вакансий для женщин
+        if (selectedGender === 'женщина') {
+            // Для женщин: проверяем женские вакансии И разрешен ли пол
+            if (!obj.allowedGenders.includes('женщина') || vacancyStats.women === 0) {
+                return false;
+            }
+        }
+        
+        if (selectedGender === 'семейные') {
+            // Для семейных: проверяем семейные вакансии
+            if (vacancyStats.family === 0) {
+                return false;
+            }
         }
 
         return true;
@@ -69,6 +81,8 @@ function displayResults(objectsToDisplay, resultsContainer, resultsCount) {
         vacancyFilterInfo = ' (показаны только объекты с вакансиями для мужчин)';
     } else if (selectedGender === 'женщина') {
         vacancyFilterInfo = ' (показаны только объекты с вакансиями для женщин)';
+    } else if (selectedGender === 'семейные') {
+        vacancyFilterInfo = ' (показаны только объекты с семейными комнатами)';
     }
     
     resultsCount.textContent = `Найдено объектов: ${totalCount} (${priorityCount} в приоритете)${vacancyFilterInfo}`;
@@ -94,6 +108,14 @@ function displayResults(objectsToDisplay, resultsContainer, resultsCount) {
             );
             if (objectsWithMen.length > 0) {
                 noResultsMessage = '❌ На данных объектах сейчас нет вакансий для мужчин. Попробуйте выбрать другой пол или проверьте позже.';
+            }
+        } else if (selectedGender === 'семейные') {
+            const objectsWithFamily = objects.filter(obj => 
+                obj.visible && 
+                !objectsToDisplay.includes(obj)
+            );
+            if (objectsWithFamily.length > 0) {
+                noResultsMessage = '❌ На данных объектах сейчас нет семейных комнат. Попробуйте выбрать другой тип размещения или проверьте позже.';
             }
         }
         
