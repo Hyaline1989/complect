@@ -390,7 +390,7 @@ input:focus, select:focus {
 .object-card.priority-card {
     border-left: 5px solid #ff4500;
     background: linear-gradient(135deg, rgba(255,140,0,0.95), rgba(240,255,244,0.95));
-    box-shadow: 0 4px 20px rgba(39, 174, 96, 1); /* Зеленая тень для приоритетных */
+    box-shadow: 0 4px 20px rgba(255,140,0, 1); /* Зеленая тень для приоритетных */
 }
 
 .object-card.priority-card:hover {
