@@ -95,7 +95,7 @@ async function showContent() {
     if (currentAccessLevel === "admin") {
         userInfo.innerHTML = `
             <div class="user-badge-container">
-                <img src="images/witch.jpg" class="avatar admin-avatar" alt="Админ">
+                <img src="images/admin.jpg" class="avatar admin-avatar" alt="Админ">
                 <div class="admin-badge">Администратор</div>
                 <button class="logout-btn" onclick="logout()">🚪 Выйти</button>
             </div>
@@ -106,7 +106,7 @@ async function showContent() {
     } else {
         userInfo.innerHTML = `
             <div class="user-badge-container">
-                <img src="images/pumpkin.jpg" class="avatar user-avatar" alt="Пользователь">
+                <img src="images/user.jpg" class="avatar user-avatar" alt="Пользователь">
                 <div class="user-badge">Пользователь</div>
                 <button class="logout-btn" onclick="logout()">🚪 Выйти</button>
             </div>
