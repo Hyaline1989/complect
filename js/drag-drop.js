@@ -80,6 +80,5 @@ function resetGlobalOrder() {
         updateSaveButtonState();
         fillMenuWithObjects();
         filterAndDisplayObjects();
-        updateSyncStatus('🔄 Порядок сброшен (не забудьте сохранить!)');
     }
 }

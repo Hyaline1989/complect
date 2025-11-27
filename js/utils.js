@@ -68,53 +68,24 @@ function updateDebugInfoWithVacancyData() {
     debugInfo.scrollTop = 0;
 }
 
-function updateSyncStatus(message) {
-    const statusElement = document.getElementById('syncStatus');
-    if (statusElement) {
-        statusElement.textContent = message;
-        
-        if (message.includes('✅') || message.includes('❌')) {
-            setTimeout(() => {
-                statusElement.textContent = '';
-            }, 3000);
-        }
-    }
-}
-
 // ФУНКЦИИ АВТООБНОВЛЕНИЯ
 function startAutoUpdate() {
     if (updateInterval) {
         clearInterval(updateInterval);
     }
     
-    if (currentAccessLevel === "user") {
-        updateInterval = setInterval(async () => {
-            await loadSettingsFromServer();
-            filterAndDisplayObjects();
-            updateSyncStatus('🔄 Данные автоматически обновлены');
-        }, 60000);
-    }
+    // Автоматическое обновление каждые 30 секунд для всех пользователей
+    updateInterval = setInterval(async () => {
+        await loadSettingsFromServer();
+        filterAndDisplayObjects();
+        console.log('🔄 Данные автоматически обновлены');
+    }, 30000); // 30 секунд
 }
 
 function stopAutoUpdate() {
     if (updateInterval) {
         clearInterval(updateInterval);
         updateInterval = null;
-    }
-}
-
-async function manualSync() {
-    updateSyncStatus('🔄 Ручное обновление...');
-    await loadSettingsFromServer();
-    filterAndDisplayObjects();
-    if (currentAccessLevel === "admin") {
-        fillMenuWithObjects();
-    }
-    updateSyncStatus('✅ Данные обновлены');
-    
-    // Обновляем отладочную информацию если она открыта
-    if (debugMode) {
-        updateDebugInfoWithVacancyData();
     }
 }
 

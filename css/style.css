@@ -415,20 +415,14 @@ input:focus, select:focus {
     display: none;
 }
 
-.sync-status {
-    text-align: center;
-    margin: 10px 0;
-    font-size: 12px;
-    color: #7f8c8d;
-}
-
-.sync-controls {
+/* Стили для блока отладки */
+.debug-controls {
     text-align: center;
     margin: 10px 0;
 }
 
-.sync-btn {
-    background: #3498db;
+.debug-toggle {
+    background: #6c757d;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -438,8 +432,8 @@ input:focus, select:focus {
     transition: background 0.3s;
 }
 
-.sync-btn:hover {
-    background: #2980b9;
+.debug-toggle:hover {
+    background: #5a6268;
 }
 
 /* Стили для аватарок */
@@ -510,17 +504,6 @@ input:focus, select:focus {
     color: #856404;
     max-height: 200px;
     overflow-y: auto;
-}
-
-.debug-toggle {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 10px;
 }
 
 .order-number {
@@ -911,22 +894,6 @@ input:focus, select:focus {
 }
 
 /* Улучшенные стили для состояний загрузки */
-.sync-status.loading {
-    color: #3498db;
-    font-weight: bold;
-}
-
-.sync-status.success {
-    color: #27ae60;
-    font-weight: bold;
-}
-
-.sync-status.error {
-    color: #e74c3c;
-    font-weight: bold;
-}
-
-/* Стили для пустых состояний */
 .empty-state {
     text-align: center;
     padding: 40px;

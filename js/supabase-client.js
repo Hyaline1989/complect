@@ -1,8 +1,6 @@
 // ФУНКЦИИ ДЛЯ РАБОТЫ С SUPABASE
 async function loadSettingsFromServer() {
     try {
-        updateSyncStatus('🔄 Загрузка данных...');
-        
         const { data, error } = await supabase
             .from('objects_settings')
             .select('*');
@@ -34,11 +32,9 @@ async function loadSettingsFromServer() {
         // Загружаем данные о вакансиях
         await loadVacancyData();
         
-        updateSyncStatus('✅ Данные загружены');
         return objects;
     } catch (error) {
         console.error('Ошибка загрузки настроек:', error);
-        updateSyncStatus('❌ Ошибка загрузки');
         objects = objectsBase.map(obj => ({ ...obj, visible: true, priority: false }));
         globalOrder = objectsBase.map(obj => obj.id);
         return objects;
@@ -75,8 +71,6 @@ async function saveGlobalOrderToServer() {
     if (currentAccessLevel !== "admin") return;
     
     try {
-        updateSyncStatus('💾 Сохранение глобального порядка...');
-        
         const { error } = await supabase
             .from('global_objects_order')
             .upsert({
@@ -89,10 +83,8 @@ async function saveGlobalOrderToServer() {
         
         hasUnsavedChanges = false;
         updateSaveButtonState();
-        updateSyncStatus('✅ Глобальный порядок сохранен');
     } catch (error) {
         console.error('Ошибка сохранения глобального порядка:', error);
-        updateSyncStatus('❌ Ошибка сохранения порядка');
         alert('Ошибка сохранения порядка: ' + error.message);
     }
 }
@@ -121,11 +113,8 @@ async function checkAllObjectsOnServer() {
         objects.forEach(obj => obj.visible = true);
         fillMenuWithObjects();
         filterAndDisplayObjects();
-        
-        updateSyncStatus('✅ Все объекты включены');
     } catch (error) {
         console.error('Ошибка:', error);
-        updateSyncStatus('❌ Ошибка сохранения');
     }
 }
 
@@ -153,10 +142,7 @@ async function uncheckAllObjectsOnServer() {
         objects.forEach(obj => obj.visible = false);
         fillMenuWithObjects();
         filterAndDisplayObjects();
-        
-        updateSyncStatus('✅ Все объекты скрыты');
     } catch (error) {
         console.error('Ошибка:', error);
-        updateSyncStatus('❌ Ошибка сохранения');
     }
 }
