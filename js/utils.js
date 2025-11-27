@@ -1,24 +1,3 @@
-// Тестовая функция для проверки уведомлений
-function testNotification() {
-    console.log('🧪 Тестируем систему уведомлений...');
-    
-    // Создаем тестовые изменения
-    const testChanges = [{
-        objectName: "Тестовый объект",
-        type: "update",
-        changes: {
-            men: { old: 5, new: 10, changed: true },
-            women: { old: 3, new: 3, changed: false },
-            family: { old: 2, new: 1, changed: true }
-        }
-    }];
-    
-    console.log('📋 Тестовые изменения:', testChanges);
-    
-    // Запускаем обработку уведомлений
-    handleVacancyChanges(testChanges);
-}
-
 // ФУНКЦИИ ОТЛАДКИ
 function toggleDebug() {
     debugMode = !debugMode;
@@ -43,7 +22,6 @@ function updateDebugInfoWithVacancyData() {
         <div style="margin-bottom: 15px;">
             <strong>Отладочная информация - данные из Google Sheets:</strong>
             <button onclick="clearAllNotifications()" style="margin-left: 10px; padding: 2px 8px; font-size: 10px;">Очистить уведомления</button>
-            <button onclick="testNotification()" style="margin-left: 10px; padding: 2px 8px; font-size: 10px;">🧪 Тест уведомления</button>
         </div>
     `;
     
