@@ -231,6 +231,16 @@ function detectChanges(newData) {
 function handleVacancyChanges(changes) {
     console.log('🔔 Обрабатываем изменения:', changes);
     
+    // Проверяем, что функции существуют
+    if (typeof saveNotifications === 'undefined') {
+        console.error('❌ Функция saveNotifications не определена!');
+        return;
+    }
+    if (typeof showTabNotification === 'undefined') {
+        console.error('❌ Функция showTabNotification не определена!');
+        return;
+    }
+    
     // Проверяем localStorage
     try {
         localStorage.setItem('test', 'test');

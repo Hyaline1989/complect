@@ -1,3 +1,24 @@
+// Тестовая функция для проверки уведомлений
+function testNotification() {
+    console.log('🧪 Тестируем систему уведомлений...');
+    
+    // Создаем тестовые изменения
+    const testChanges = [{
+        objectName: "Тестовый объект",
+        type: "update",
+        changes: {
+            men: { old: 5, new: 10, changed: true },
+            women: { old: 3, new: 3, changed: false },
+            family: { old: 2, new: 1, changed: true }
+        }
+    }];
+    
+    console.log('📋 Тестовые изменения:', testChanges);
+    
+    // Запускаем обработку уведомлений
+    handleVacancyChanges(testChanges);
+}
+
 // ФУНКЦИИ ОТЛАДКИ
 function toggleDebug() {
     debugMode = !debugMode;
@@ -69,31 +90,6 @@ function updateDebugInfoWithVacancyData() {
     
     debugInfo.innerHTML = debugHTML;
     debugInfo.scrollTop = 0;
-}
-
-// Тестовая функция для проверки уведомлений
-function testNotification() {
-    console.log('🧪 Тестируем систему уведомлений...');
-    
-    // Создаем тестовые изменения
-    const testChanges = [{
-        objectName: "Тестовый объект",
-        type: "update",
-        changes: {
-            men: { old: 5, new: 10, changed: true },
-            women: { old: 3, new: 3, changed: false },
-            family: { old: 2, new: 1, changed: true }
-        }
-    }];
-    
-    console.log('📋 Тестовые изменения:', testChanges);
-    
-    // Запускаем обработку уведомлений
-    handleVacancyChanges(testChanges);
-    
-    // Принудительно показываем уведомление
-    const message = 'Тестовое уведомление: <strong>Тестовый объект</strong><br>👨 потребность для мужчин увеличилась на 5<br>👨‍👩‍👧‍👦 количество семейных комнат уменьшилось на 1';
-    showNotificationDialog(message);
 }
 
 // ФУНКЦИИ АВТООБНОВЛЕНИЯ
