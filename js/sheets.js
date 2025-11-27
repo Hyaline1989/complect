@@ -165,11 +165,9 @@ async function loadVacancyData() {
     }
 }
 
-// Функция для обнаружения изменений
+// Функция для обнаружения изменений ТОЛЬКО значимых
 function detectChanges(newData) {
     console.log('🔍 Начинаем проверку изменений...');
-    console.log('Старые данные:', vacancyData);
-    console.log('Новые данные:', newData);
     
     const changes = [];
     
@@ -179,24 +177,16 @@ function detectChanges(newData) {
         const newStats = newData[objectName];
         
         if (!oldStats) {
-            console.log(`🆕 Новый объект: ${objectName}`);
-            changes.push({
-                objectName: objectName,
-                type: 'new',
-                changes: {
-                    men: newStats.men,
-                    women: newStats.women,
-                    family: newStats.family
-                }
-            });
+            // ИГНОРИРУЕМ новые объекты - это не изменение потребности
+            console.log(`➡️ Новый объект (игнорируем): ${objectName}`);
         } else {
-            // Проверяем изменения в количестве
-            const menChanged = oldStats.men !== newStats.men;
-            const womenChanged = oldStats.women !== newStats.women;
-            const familyChanged = oldStats.family !== newStats.family;
+            // Проверяем изменения в количестве - ТОЛЬКО значимые
+            const menChanged = isSignificantChange(oldStats.men, newStats.men);
+            const womenChanged = isSignificantChange(oldStats.women, newStats.women);
+            const familyChanged = isSignificantChange(oldStats.family, newStats.family);
             
             if (menChanged || womenChanged || familyChanged) {
-                console.log(`🔄 Изменения в ${objectName}:`, {
+                console.log(`🔄 ЗНАЧИМОЕ изменение в ${objectName}:`, {
                     men: { old: oldStats.men, new: newStats.men, changed: menChanged },
                     women: { old: oldStats.women, new: newStats.women, changed: womenChanged },
                     family: { old: oldStats.family, new: newStats.family, changed: familyChanged }
@@ -211,25 +201,54 @@ function detectChanges(newData) {
                         family: { old: oldStats.family, new: newStats.family, changed: familyChanged }
                     }
                 });
+            } else {
+                console.log(`✅ Без изменений: ${objectName}`);
             }
         }
     });
     
-    console.log(`📊 Найдено изменений: ${changes.length}`);
+    console.log(`📊 Найдено ЗНАЧИМЫХ изменений: ${changes.length}`);
     
-    // Обрабатываем изменения
+    // Обрабатываем изменения ТОЛЬКО если они есть
     if (changes.length > 0) {
         handleVacancyChanges(changes);
     } else {
-        console.log('✅ Изменений не обнаружено');
+        console.log('✅ Значимых изменений не обнаружено');
     }
     
     return changes;
 }
 
+// Функция проверки ЗНАЧИМОГО изменения
+function isSignificantChange(oldValue, newValue) {
+    // Игнорируем изменения между 0 и 0
+    if (oldValue === 0 && newValue === 0) {
+        return false;
+    }
+    
+    // Игнорируем изменения от null/undefined к 0
+    if ((oldValue === null || oldValue === undefined) && newValue === 0) {
+        return false;
+    }
+    
+    // Игнорируем изменения от 0 к null/undefined  
+    if (oldValue === 0 && (newValue === null || newValue === undefined)) {
+        return false;
+    }
+    
+    // Считаем значимым любое изменение чисел
+    return oldValue !== newValue;
+}
+
 // Обработка изменений в вакансиях
 function handleVacancyChanges(changes) {
-    console.log('🔔 Обрабатываем изменения:', changes);
+    console.log('🔔 Обрабатываем ЗНАЧИМЫЕ изменения:', changes);
+    
+    // Если нет значимых изменений - выходим
+    if (changes.length === 0) {
+        console.log('🚫 Нет значимых изменений для уведомлений');
+        return;
+    }
     
     // Проверяем, что функции существуют
     if (typeof saveNotifications === 'undefined') {
@@ -258,6 +277,8 @@ function handleVacancyChanges(changes) {
     // Если вкладка активна - показываем уведомления сразу
     if (isTabActive) {
         console.log('📱 Вкладка активна, показываем уведомления');
+        console.log('🔍 Проверяем isTabActive:', isTabActive);
+        console.log('🔍 Количество изменений для показа:', changes.length);
         showNotifications(changes);
     } else {
         console.log('💤 Вкладка неактивна, сохраняем уведомления');
@@ -299,14 +320,29 @@ function clearTabNotification() {
 // Показываем уведомления
 function showNotifications(changes) {
     console.log('🎯 Показываем уведомления для изменений:', changes.length);
+    console.log('🔍 Все изменения:', changes);
     
+    if (changes.length === 0) {
+        console.log('⚠️ Нет изменений для показа');
+        return;
+    }
+    
+    let shownCount = 0;
     changes.forEach((change, index) => {
         if (change.type === 'update') {
             console.log(`📨 Уведомление ${index + 1}:`, change);
             const message = generateNotificationMessage(change);
+            console.log(`📝 Текст уведомления: ${message}`);
             showNotificationDialog(message);
+            shownCount++;
         }
     });
+    
+    console.log(`✅ Показано уведомлений: ${shownCount}`);
+    
+    if (shownCount === 0) {
+        console.log('⚠️ Все изменения были типа "new", а не "update"');
+    }
 }
 
 // Генерируем текст уведомления
