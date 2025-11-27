@@ -1,4 +1,8 @@
 // ФУНКЦИИ ДЛЯ РАБОТЫ С НОВОЙ GOOGLE SHEETS
+
+// Глобальная переменная для интервала мигания
+let tabBlinkInterval = null;
+
 async function loadVacancyData() {
     try {
         const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}&range=${SHEET_RANGE}`;
@@ -18,7 +22,7 @@ async function loadVacancyData() {
         const text = await response.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
         
-        vacancyData = {};
+        const newVacancyData = {};
         
         // Временное хранилище для сбора данных по объектам
         const tempData = {};
@@ -77,14 +81,9 @@ async function loadVacancyData() {
             }
         });
 
-        // ОТЛАДОЧНАЯ ИНФОРМАЦИЯ - посмотрим что пришло из таблицы
-        console.log('📊 Данные из таблицы:', tempData);
-        
         // Сопоставляем с нашими объектами - УЛУЧШЕННАЯ ЛОГИКА
         Object.keys(tempData).forEach(rawObjectName => {
             const cleanName = rawObjectName.toLowerCase().trim();
-            
-            console.log(`🔍 Ищем совпадение для: "${rawObjectName}" (${cleanName})`);
             
             // ПРИОРИТЕТНЫЕ ПРАВИЛА СОПОСТАВЛЕНИЯ
             let matchedObject = null;
@@ -92,19 +91,15 @@ async function loadVacancyData() {
             // 1. Сначала ищем по точным правилам для сложных случаев
             if (cleanName.includes('спортмастер') && (cleanName.includes('спб') || cleanName.includes('питер') || cleanName.includes('санкт'))) {
                 matchedObject = objectsBase.find(obj => obj.name === 'Спортмастер СПБ');
-                console.log(`✅ Найдено по правилу СПБ: "${rawObjectName}" -> "Спортмастер СПБ"`);
             }
             else if (cleanName.includes('мираторг') && cleanName.includes('тула')) {
                 matchedObject = objectsBase.find(obj => obj.name === 'Мираторг Тула');
-                console.log(`✅ Найдено по правилу Тула: "${rawObjectName}" -> "Мираторг Тула"`);
             }
             else if (cleanName.includes('мираторг') && !cleanName.includes('тула')) {
                 matchedObject = objectsBase.find(obj => obj.name === 'Мираторг Брянск');
-                console.log(`✅ Найдено по правилу Брянск: "${rawObjectName}" -> "Мираторг Брянск"`);
             }
             else if (cleanName.includes('сберлогистика')) {
                 matchedObject = objectsBase.find(obj => obj.name === 'Сберлогистика');
-                console.log(`✅ Найдено по правилу Сбер: "${rawObjectName}" -> "Сберлогистика"`);
             }
             // 2. Если не нашли по правилам, ищем точное совпадение
             else {
@@ -112,10 +107,6 @@ async function loadVacancyData() {
                     const objNameLower = obj.name.toLowerCase();
                     return cleanName === objNameLower;
                 });
-                
-                if (matchedObject) {
-                    console.log(`✅ Точное совпадение: "${rawObjectName}" -> "${matchedObject.name}"`);
-                }
             }
             
             // 3. Если не нашли точное, ищем частичное совпадение
@@ -124,10 +115,6 @@ async function loadVacancyData() {
                     const objNameLower = obj.name.toLowerCase();
                     return cleanName.includes(objNameLower) || objNameLower.includes(cleanName);
                 });
-                
-                if (matchedObject) {
-                    console.log(`✅ Частичное совпадение: "${rawObjectName}" -> "${matchedObject.name}"`);
-                }
             }
             
             // 4. Если все еще не нашли, используем нечеткое сравнение
@@ -135,38 +122,32 @@ async function loadVacancyData() {
                 matchedObject = objectsBase.find(obj => {
                     return fuzzyMatch(cleanName, obj.name.toLowerCase());
                 });
-                
-                if (matchedObject) {
-                    console.log(`✅ Нечеткое совпадение: "${rawObjectName}" -> "${matchedObject.name}"`);
-                }
             }
 
             if (matchedObject) {
-                vacancyData[matchedObject.name] = tempData[rawObjectName];
-                console.log(`🎯 ФИНАЛЬНОЕ СОПОСТАВЛЕНИЕ: "${rawObjectName}" -> "${matchedObject.name}"`);
-            } else {
-                console.log(`❌ Не найдено сопоставление для: "${rawObjectName}"`);
-                // Выведем все доступные объекты для отладки
-                console.log('📋 Доступные объекты:', objectsBase.map(obj => obj.name));
+                newVacancyData[matchedObject.name] = tempData[rawObjectName];
             }
         });
         
         // Заполняем нулями объекты, для которых не нашли данные
         objectsBase.forEach(obj => {
-            if (!vacancyData[obj.name]) {
-                vacancyData[obj.name] = {
+            if (!newVacancyData[obj.name]) {
+                newVacancyData[obj.name] = {
                     men: 0,
                     women: 0,
                     family: 0,
                     positions: [],
                     rawName: 'Не найдено в таблице'
                 };
-                console.log(`⚠️ Объект не найден в таблице: "${obj.name}"`);
             }
         });
 
-        // ФИНАЛЬНАЯ ОТЛАДОЧНАЯ ИНФОРМАЦИЯ
-        console.log('🎯 ФИНАЛЬНЫЕ ДАННЫЕ:', vacancyData);
+        // Проверяем изменения в данных
+        detectChanges(newVacancyData);
+        
+        // Обновляем данные
+        previousVacancyData = JSON.parse(JSON.stringify(vacancyData));
+        vacancyData = newVacancyData;
         
         return vacancyData;
     } catch (err) {
@@ -182,6 +163,239 @@ async function loadVacancyData() {
         });
         return vacancyData;
     }
+}
+
+// Функция для обнаружения изменений
+function detectChanges(newData) {
+    const changes = [];
+    
+    // Проверяем изменения для каждого объекта
+    Object.keys(newData).forEach(objectName => {
+        const oldStats = vacancyData[objectName];
+        const newStats = newData[objectName];
+        
+        if (!oldStats) {
+            // Новый объект
+            changes.push({
+                objectName: objectName,
+                type: 'new',
+                changes: {
+                    men: newStats.men,
+                    women: newStats.women,
+                    family: newStats.family
+                }
+            });
+        } else {
+            // Проверяем изменения в количестве
+            const menChanged = oldStats.men !== newStats.men;
+            const womenChanged = oldStats.women !== newStats.women;
+            const familyChanged = oldStats.family !== newStats.family;
+            
+            if (menChanged || womenChanged || familyChanged) {
+                changes.push({
+                    objectName: objectName,
+                    type: 'update',
+                    changes: {
+                        men: { old: oldStats.men, new: newStats.men, changed: menChanged },
+                        women: { old: oldStats.women, new: newStats.women, changed: womenChanged },
+                        family: { old: oldStats.family, new: newStats.family, changed: familyChanged }
+                    }
+                });
+            }
+        }
+    });
+    
+    // Обрабатываем изменения
+    if (changes.length > 0) {
+        handleVacancyChanges(changes);
+    }
+    
+    return changes;
+}
+
+// Обработка изменений в вакансиях
+function handleVacancyChanges(changes) {
+    console.log('🔔 Обнаружены изменения:', changes);
+    
+    // Сохраняем уведомления
+    saveNotifications(changes);
+    
+    // Показываем значок уведомления на вкладке
+    showTabNotification();
+    
+    // Если вкладка активна - показываем уведомления сразу
+    if (isTabActive) {
+        showNotifications(changes);
+    }
+}
+
+// Показываем значок уведомления на вкладке
+function showTabNotification() {
+    // Останавливаем предыдущее мигание если было
+    if (tabBlinkInterval) {
+        clearInterval(tabBlinkInterval);
+    }
+    
+    const originalTitle = document.title.replace('🔔 ', '');
+    let blinkState = true;
+    
+    // Запускаем мигание
+    tabBlinkInterval = setInterval(() => {
+        document.title = blinkState ? '🔔 ' + originalTitle : originalTitle;
+        blinkState = !blinkState;
+    }, 1000);
+}
+
+// Очищаем значок уведомления и останавливаем мигание
+function clearTabNotification() {
+    if (tabBlinkInterval) {
+        clearInterval(tabBlinkInterval);
+        tabBlinkInterval = null;
+    }
+    
+    const originalTitle = document.title.replace('🔔 ', '');
+    document.title = originalTitle;
+}
+
+// Показываем уведомления
+function showNotifications(changes) {
+    changes.forEach(change => {
+        if (change.type === 'update') {
+            const message = generateNotificationMessage(change);
+            showNotificationDialog(message);
+        }
+    });
+    
+    // УБИРАЕМ очистку значка - он должен мигать пока уведомления не закрыты
+    // clearTabNotification(); // ← ЭТУ СТРОКУ УДАЛЯЕМ
+}
+
+// Генерируем текст уведомления
+function generateNotificationMessage(change) {
+    const { objectName, changes } = change;
+    const messages = [];
+    
+    if (changes.men.changed) {
+        const diff = changes.men.new - changes.men.old;
+        const direction = diff > 0 ? 'увеличилась' : 'уменьшилась';
+        messages.push(`👨 потребность для мужчин ${direction} на ${Math.abs(diff)}`);
+    }
+    
+    if (changes.women.changed) {
+        const diff = changes.women.new - changes.women.old;
+        const direction = diff > 0 ? 'увеличилась' : 'уменьшилась';
+        messages.push(`👩 потребность для женщин ${direction} на ${Math.abs(diff)}`);
+    }
+    
+    if (changes.family.changed) {
+        const diff = changes.family.new - changes.family.old;
+        const direction = diff > 0 ? 'увеличилось' : 'уменьшилось';
+        messages.push(`👨‍👩‍👧‍👦 количество семейных комнат ${direction} на ${Math.abs(diff)}`);
+    }
+    
+    return `Потребность на <strong>${objectName}</strong> обновлена:<br>${messages.join('<br>')}`;
+}
+
+// Показываем диалоговое окно уведомления
+function showNotificationDialog(message) {
+    // Создаем элемент уведомления
+    const notification = document.createElement('div');
+    notification.className = 'vacancy-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <div class="notification-header">
+                <span class="notification-icon">🔔</span>
+                <span class="notification-title">Обновление вакансий</span>
+                <button class="notification-close" onclick="closeNotification(this)">×</button>
+            </div>
+            <div class="notification-body">
+                ${message}
+            </div>
+            <div class="notification-footer">
+                <button class="notification-ok-btn" onclick="closeNotification(this)">OK</button>
+            </div>
+        </div>
+    `;
+    
+    // Добавляем стили
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border: 2px solid #3498db;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 10000;
+        min-width: 300px;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // УБИРАЕМ автоскрытие - уведомление висит пока не закроют
+}
+
+// Функция для закрытия уведомления
+function closeNotification(button) {
+    const notification = button.closest('.vacancy-notification');
+    if (notification) {
+        notification.remove();
+        // Проверяем, остались ли другие уведомления
+        checkRemainingNotifications();
+    }
+}
+
+// Проверяем оставшиеся уведомления после закрытия
+function checkRemainingNotifications() {
+    const notifications = document.querySelectorAll('.vacancy-notification');
+    if (notifications.length === 0) {
+        // Если все уведомления закрыты - останавливаем мигание
+        clearTabNotification();
+    }
+}
+
+// Сохраняем уведомления в localStorage
+function saveNotifications(changes) {
+    const notifications = JSON.parse(localStorage.getItem(NOTIFICATION_KEY) || '[]');
+    const newNotifications = changes.map(change => ({
+        ...change,
+        timestamp: new Date().toISOString(),
+        read: false
+    }));
+    
+    localStorage.setItem(NOTIFICATION_KEY, JSON.stringify([
+        ...notifications,
+        ...newNotifications
+    ]));
+}
+
+// Загружаем непрочитанные уведомления
+function loadPendingNotifications() {
+    const notifications = JSON.parse(localStorage.getItem(NOTIFICATION_KEY) || '[]');
+    const unreadNotifications = notifications.filter(notification => !notification.read);
+    
+    if (unreadNotifications.length > 0 && isTabActive) {
+        showNotifications(unreadNotifications);
+        
+        // Помечаем как прочитанные в localStorage, но оставляем мигание
+        notifications.forEach(notification => notification.read = true);
+        localStorage.setItem(NOTIFICATION_KEY, JSON.stringify(notifications));
+        
+        // НЕ останавливаем мигание - оно должно продолжаться пока уведомления не закрыты
+    }
+}
+
+// Очищаем все уведомления
+function clearAllNotifications() {
+    localStorage.removeItem(NOTIFICATION_KEY);
+    // Закрываем все открытые уведомления
+    document.querySelectorAll('.vacancy-notification').forEach(notification => {
+        notification.remove();
+    });
+    // Останавливаем мигание
+    clearTabNotification();
 }
 
 // УЛУЧШЕННАЯ функция для нечеткого сравнения

@@ -21,6 +21,7 @@ function updateDebugInfoWithVacancyData() {
     let debugHTML = `
         <div style="margin-bottom: 15px;">
             <strong>Отладочная информация - данные из Google Sheets:</strong>
+            <button onclick="clearAllNotifications()" style="margin-left: 10px; padding: 2px 8px; font-size: 10px;">Очистить уведомления</button>
         </div>
     `;
     
@@ -60,7 +61,8 @@ function updateDebugInfoWithVacancyData() {
             <strong>Статистика:</strong><br>
             - Найдено объектов в таблице: ${foundCount} из ${objectsBase.length}<br>
             - Всего вакансий: Мужчины ${totalMen} | Женщины ${totalWomen} | Семьи ${totalFamily}<br>
-            - Время загрузки: ${new Date().toLocaleString()}
+            - Время загрузки: ${new Date().toLocaleString()}<br>
+            - Статус вкладки: ${isTabActive ? '🟢 Активна' : '🔴 Неактивна'}
         </div>
     `;
     

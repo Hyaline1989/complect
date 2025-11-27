@@ -17,6 +17,10 @@ const PASSWORDS = {
 const SESSION_DURATION = 12 * 60 * 60 * 1000;
 const SESSION_KEY = "sessionData";
 
+// Настройки уведомлений
+const NOTIFICATION_KEY = "vacancyNotifications";
+const NOTIFICATION_TIMEOUT = 5000; // 5 секунд для показа уведомления
+
 // БАЗОВАЯ СТРУКТУРА ОБЪЕКТОВ
 const objectsBase = [
     {
@@ -238,9 +242,12 @@ let sessionTimer = null;
 let updateInterval = null;
 let objects = [];
 let vacancyData = {};
+let previousVacancyData = {}; // Для отслеживания изменений
 let debugMode = false;
 let globalOrder = [];
 let hasUnsavedChanges = false;
+let isTabActive = true; // Отслеживаем активность вкладки
+let pendingNotifications = []; // Очередь уведомлений
 
 // Инициализация Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
