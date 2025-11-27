@@ -51,9 +51,11 @@
         <h1>🎯 Подбор объекта для вахты</h1>
         
         <!-- ЗАМЕНЯЕМ блок синхронизации на кнопку отладки -->
-        <div class="debug-controls">
-            <button class="debug-toggle" onclick="toggleDebug()">Отладка</button>
-        </div>
+<!-- ЗАМЕНЯЕМ блок debug-controls на этот: -->
+<div class="debug-controls">
+    <button class="debug-toggle" onclick="toggleDebug()">Отладка</button>
+    <button class="test-notification-btn" onclick="testNotification()">Тест уведомления</button>
+</div>
 
         <!-- БЛОК УПРАВЛЕНИЯ ДЛЯ АДМИНИСТРАТОРА -->
         <div class="admin-controls" id="adminControls" style="display: none;">

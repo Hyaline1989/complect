@@ -167,6 +167,10 @@ async function loadVacancyData() {
 
 // Функция для обнаружения изменений
 function detectChanges(newData) {
+    console.log('🔍 Начинаем проверку изменений...');
+    console.log('Старые данные:', vacancyData);
+    console.log('Новые данные:', newData);
+    
     const changes = [];
     
     // Проверяем изменения для каждого объекта
@@ -175,7 +179,7 @@ function detectChanges(newData) {
         const newStats = newData[objectName];
         
         if (!oldStats) {
-            // Новый объект
+            console.log(`🆕 Новый объект: ${objectName}`);
             changes.push({
                 objectName: objectName,
                 type: 'new',
@@ -192,6 +196,12 @@ function detectChanges(newData) {
             const familyChanged = oldStats.family !== newStats.family;
             
             if (menChanged || womenChanged || familyChanged) {
+                console.log(`🔄 Изменения в ${objectName}:`, {
+                    men: { old: oldStats.men, new: newStats.men, changed: menChanged },
+                    women: { old: oldStats.women, new: newStats.women, changed: womenChanged },
+                    family: { old: oldStats.family, new: newStats.family, changed: familyChanged }
+                });
+                
                 changes.push({
                     objectName: objectName,
                     type: 'update',
@@ -205,9 +215,13 @@ function detectChanges(newData) {
         }
     });
     
+    console.log(`📊 Найдено изменений: ${changes.length}`);
+    
     // Обрабатываем изменения
     if (changes.length > 0) {
         handleVacancyChanges(changes);
+    } else {
+        console.log('✅ Изменений не обнаружено');
     }
     
     return changes;
@@ -215,7 +229,15 @@ function detectChanges(newData) {
 
 // Обработка изменений в вакансиях
 function handleVacancyChanges(changes) {
-    console.log('🔔 Обнаружены изменения:', changes);
+    console.log('🔔 Обрабатываем изменения:', changes);
+    
+    // Проверяем localStorage
+    try {
+        localStorage.setItem('test', 'test');
+        console.log('✅ localStorage работает');
+    } catch (e) {
+        console.error('❌ localStorage не доступен:', e);
+    }
     
     // Сохраняем уведомления
     saveNotifications(changes);
@@ -225,7 +247,10 @@ function handleVacancyChanges(changes) {
     
     // Если вкладка активна - показываем уведомления сразу
     if (isTabActive) {
+        console.log('📱 Вкладка активна, показываем уведомления');
         showNotifications(changes);
+    } else {
+        console.log('💤 Вкладка неактивна, сохраняем уведомления');
     }
 }
 
@@ -244,6 +269,8 @@ function showTabNotification() {
         document.title = blinkState ? '🔔 ' + originalTitle : originalTitle;
         blinkState = !blinkState;
     }, 1000);
+    
+    console.log('🎯 Запущено мигание вкладки');
 }
 
 // Очищаем значок уведомления и останавливаем мигание
@@ -255,19 +282,21 @@ function clearTabNotification() {
     
     const originalTitle = document.title.replace('🔔 ', '');
     document.title = originalTitle;
+    
+    console.log('🧹 Мигание вкладки остановлено');
 }
 
 // Показываем уведомления
 function showNotifications(changes) {
-    changes.forEach(change => {
+    console.log('🎯 Показываем уведомления для изменений:', changes.length);
+    
+    changes.forEach((change, index) => {
         if (change.type === 'update') {
+            console.log(`📨 Уведомление ${index + 1}:`, change);
             const message = generateNotificationMessage(change);
             showNotificationDialog(message);
         }
     });
-    
-    // УБИРАЕМ очистку значка - он должен мигать пока уведомления не закрыты
-    // clearTabNotification(); // ← ЭТУ СТРОКУ УДАЛЯЕМ
 }
 
 // Генерируем текст уведомления
@@ -298,6 +327,8 @@ function generateNotificationMessage(change) {
 
 // Показываем диалоговое окно уведомления
 function showNotificationDialog(message) {
+    console.log('📝 Создаем диалоговое окно:', message);
+    
     // Создаем элемент уведомления
     const notification = document.createElement('div');
     notification.className = 'vacancy-notification';
@@ -333,8 +364,7 @@ function showNotificationDialog(message) {
     `;
     
     document.body.appendChild(notification);
-    
-    // УБИРАЕМ автоскрытие - уведомление висит пока не закроют
+    console.log('✅ Диалоговое окно создано');
 }
 
 // Функция для закрытия уведомления
@@ -369,6 +399,8 @@ function saveNotifications(changes) {
         ...notifications,
         ...newNotifications
     ]));
+    
+    console.log('💾 Уведомления сохранены в localStorage');
 }
 
 // Загружаем непрочитанные уведомления
@@ -377,6 +409,7 @@ function loadPendingNotifications() {
     const unreadNotifications = notifications.filter(notification => !notification.read);
     
     if (unreadNotifications.length > 0 && isTabActive) {
+        console.log('📥 Загружаем непрочитанные уведомления:', unreadNotifications.length);
         showNotifications(unreadNotifications);
         
         // Помечаем как прочитанные в localStorage, но оставляем мигание
@@ -396,6 +429,7 @@ function clearAllNotifications() {
     });
     // Останавливаем мигание
     clearTabNotification();
+    console.log('🗑️ Все уведомления очищены');
 }
 
 // УЛУЧШЕННАЯ функция для нечеткого сравнения

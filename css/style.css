@@ -1165,3 +1165,20 @@ button:disabled:hover {
         top: 5px;
     }
 }
+
+/* Стили для тестовой кнопки */
+.test-notification-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    transition: background 0.3s;
+}
+
+.test-notification-btn:hover {
+    background: #c0392b;
+}

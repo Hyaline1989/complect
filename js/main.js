@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     window.clearAllNotifications = clearAllNotifications;
-    window.closeNotification = closeNotification; // ← ДОБАВЛЯЕМ ЭТУ ФУНКЦИЮ
+    window.closeNotification = closeNotification;
+    window.testNotification = testNotification; // ← ДОБАВЛЯЕМ ТЕСТОВУЮ ФУНКЦИЮ
     
     // Отслеживаем видимость вкладки
     document.addEventListener('visibilitychange', function() {
