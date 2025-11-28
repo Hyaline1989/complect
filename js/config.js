@@ -232,6 +232,16 @@ const objectsBase = [
         allowedNationalities: ["РФ"],
         allowsConviction: false,
         link: "https://docs.google.com/spreadsheets/d/13FLpkCRuY8Bhdq8VzAsUMXlH-O6DcnwMlb3a1d82z44/edit?gid=244932662#gid=244932662"
+    },
+    {
+        id: 22,
+        name: "Мармеладыч",
+        ageMin: 18,
+        ageMax: 50,
+        allowedGenders: ["мужчина", "женщина"],
+        allowedNationalities: ["РФ", "РБ"],
+        allowsConviction: true,
+        link: "https://docs.google.com/spreadsheets/d/13FLpkCRuY8Bhdq8VzAsUMXlH-O6DcnwMlb3a1d82z44/edit?gid=1707924363#gid=1707924363"
     }
 ];
 
