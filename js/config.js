@@ -28,7 +28,7 @@ const objectsBase = [
         name: "Сберлогистика",
         ageMin: 18,
         ageMax: 45,
-        allowedGenders: ["мужчина"],
+        allowedGenders: ["мужчина", "женщина"],
         allowedNationalities: ["РФ", "РБ"],
         allowsConviction: false,
         link: "https://docs.google.com/spreadsheets/d/13FLpkCRuY8Bhdq8VzAsUMXlH-O6DcnwMlb3a1d82z44/edit?gid=1671362639#gid=1671362639"
