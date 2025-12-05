@@ -189,7 +189,7 @@ const objectsBase = [
         ageMin: 18,
         ageMax: 50,
         allowedGenders: ["мужчина", "женщина"],
-        allowedNationalities: ["РФ", "РБ", "СНГ"],
+        allowedNationalities: ["РФ", "РБ"],
         allowsConviction: true,
         link: "https://docs.google.com/spreadsheets/d/13FLpkCRuY8Bhdq8VzAsUMXlH-O6DcnwMlb3a1d82z44/edit?gid=2042428287#gid=2042428287"
     },
